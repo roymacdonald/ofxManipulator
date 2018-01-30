@@ -50,6 +50,10 @@ void ofxManipulator::draw(ofCamera cam, ofRectangle viewport)
   m_view = cam.getModelViewMatrix();
   m_proj = cam.getProjectionMatrix(viewport);
   m_viewInverse = m_view.getInverse();
+  m_viewInverseTranslation = m_viewInverse.getTranslation();
+  m_viewInverseScale = m_viewInverse.getScale();
+  m_viewInverseRotation = m_viewInverse.getRotate();
+  
   m_screenFactor = computeScreenFactor();
 
   ofVec3f origin = m_translation;
@@ -97,7 +101,7 @@ void ofxManipulator::draw(ofCamera cam, ofRectangle viewport)
       ofVec3f dir;
       ofVec3f up;
 
-      dir = origin - m_viewInverse.getTranslation();
+      dir = origin - m_viewInverseTranslation;
       dir.normalize();
 
       right = dir;
@@ -461,7 +465,10 @@ void ofxManipulator::mouseDragged(ofMouseEventArgs &mouse)
       if (m_currTranslation == TRANSLATION_XYZ)
       {
         ofCamera cam;
-        cam.setTransformMatrix(m_viewInverse);
+        cam.setPosition(m_viewInverseTranslation);
+        cam.setOrientation(m_viewInverseRotation);
+        cam.setScale(m_viewInverseScale);
+//        cam.setTransformMatrix(m_viewInverse);
         ofVec3f mat_pos = m_translationSaved;
         ofVec3f cam_pos = cam.getPosition();
         ofVec3f cam_n = cam.getLookAtDir();
@@ -608,7 +615,7 @@ void ofxManipulator::getCurrRotation(ROTATION_TYPE &type, unsigned int x, unsign
   if (checkRotationPlane(axe_y, 1.0f, ray_origin, ray_direction)) { type = ROTATION_Y; return; }
   if (checkRotationPlane(axe_z, 1.0f, ray_origin, ray_direction)) { type = ROTATION_Z; return; }
 
-  ofVec3f direction = m_translation - m_viewInverse.getTranslation();
+  ofVec3f direction = m_translation - m_viewInverseTranslation;
   direction.normalize();
 
   if (checkRotationPlane(direction, 1.2f, ray_origin, ray_direction)) { type = ROTATION_SCREEN; return; }
@@ -619,8 +626,10 @@ void ofxManipulator::getCurrRotation(ROTATION_TYPE &type, unsigned int x, unsign
 void ofxManipulator::getCurrTranslation(TRANSLATION_TYPE &type, unsigned int x, unsigned int y)
 {
   ofCamera cam;
-//  cam.setTransformMatrix(m_viewInverse);
-//    cam.setLocalTransform = 
+  cam.setPosition(m_viewInverseTranslation);
+  cam.setOrientation(m_viewInverseRotation);
+  cam.setScale(m_viewInverseScale);
+  
   auto mat_screenCoord = cam.worldToScreen(m_translationSaved,viewport);
   m_lockedCursor_x = mat_screenCoord.x - x;
   m_lockedCursor_y = mat_screenCoord.y - y;
@@ -705,7 +714,7 @@ void ofxManipulator::createRay(float x, float y, ofVec3f &ray_origin, ofVec3f &r
     return vec;
   };
 
-  ray_origin = view_inverse.getTranslation();
+  ray_origin = m_viewInverseTranslation;
 
   ray_dir = transform(screen_space, view_inverse);
   ray_dir.normalize();

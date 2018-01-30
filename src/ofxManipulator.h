@@ -142,4 +142,14 @@ class ofxManipulator
     ofMatrix4x4 m_view;
     ofMatrix4x4 m_viewInverse;
     ofMatrix4x4 m_proj;
+    
+    ofVec3f m_viewInverseTranslation;
+    ofVec3f m_viewInverseScale;
+    ofQuaternion m_viewInverseRotation;
+    
+    
+    
 };
+
+
+
