@@ -16,7 +16,7 @@ class ofxManipulator
       MANIPULATOR_TRANSLATION
     };
 
-    void draw(ofCamera cam, ofRectangle viewport);
+    void draw(ofCamera cam, ofRectangle viewport = ofGetCurrentViewport());
 
     ofMatrix4x4 getMatrix();
 

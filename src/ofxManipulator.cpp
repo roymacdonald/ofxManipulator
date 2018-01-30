@@ -175,6 +175,7 @@ void ofxManipulator::draw(ofCamera cam, ofRectangle viewport)
           case (ROTATION_SCREEN):
             drawCamembert(origin, x, y, -angle, unit_color_w);
             break;
+          case (ROTATION_NONE): break;//this is here just to avoid compiler warnings
         }
       }
     }
@@ -196,6 +197,7 @@ void ofxManipulator::draw(ofCamera cam, ofRectangle viewport)
       drawAxis(origin, axe_z, axe_x, axe_y, 0.05f, 0.83f, ( (curr == TRANSLATION_Z) || (curr == TRANSLATION_XYZ) ) ? select_color : unit_color_z);
     }
     break;
+    case (MANIPULATOR_NONE): break;//this is here just to avoid compiler warnings
   }
 
   ofEnableDepthTest();
@@ -321,6 +323,7 @@ void ofxManipulator::mouseMoved(ofMouseEventArgs &mouse)
     case (MANIPULATOR_TRANSLATION):
       getCurrTranslation(m_currTranslationPredict, x, y);
       break;
+    case (MANIPULATOR_NONE): break;//this is here just to avoid compiler warnings
   }
 }
 
@@ -344,6 +347,7 @@ void ofxManipulator::mousePressed(ofMouseEventArgs &mouse)
     case (MANIPULATOR_TRANSLATION):
       getCurrTranslation(m_currTranslation, x, y);
       break;
+    case (MANIPULATOR_NONE): break;//this is here just to avoid compiler warnings
   }
 }
 
@@ -394,6 +398,8 @@ void ofxManipulator::mouseDragged(ofMouseEventArgs &mouse)
           case SCALE_XY: df = ofVec3f(df.dot(axe_x+axe_y),df.dot(axe_x+axe_y),0); break;
           case SCALE_XZ: df = ofVec3f(df.dot(axe_x+axe_z),0,df.dot(axe_x+axe_z)); break;
           case SCALE_YZ: df = ofVec3f(0,df.dot(axe_y+axe_z),df.dot(axe_y+axe_z)); break;
+          case (SCALE_NONE): break;//this is here just to avoid compiler warnings
+          case (SCALE_XYZ): break;//this is here just to avoid compiler warnings
         }
       }
 
@@ -484,6 +490,8 @@ void ofxManipulator::mouseDragged(ofMouseEventArgs &mouse)
           case TRANSLATION_XY: df = ofVec3f(df.dot(axe_x),df.dot(axe_y),0); break;
           case TRANSLATION_XZ: df = ofVec3f(df.dot(axe_x),0,df.dot(axe_z)); break;
           case TRANSLATION_YZ: df = ofVec3f(0,df.dot(axe_y),df.dot(axe_z)); break;
+          case (TRANSLATION_NONE): break;//this is here just to avoid compiler warnings
+          case (TRANSLATION_XYZ): break;//this is here just to avoid compiler warnings
         }
         ofVec3f vec = (df.x * axe_x) + (df.y * axe_y) + (df.z * axe_z);
 
@@ -491,6 +499,7 @@ void ofxManipulator::mouseDragged(ofMouseEventArgs &mouse)
       }
     }
     break;
+    case (MANIPULATOR_NONE): break;//this is here just to avoid compiler warnings
   }
 }
 
@@ -611,8 +620,8 @@ void ofxManipulator::getCurrTranslation(TRANSLATION_TYPE &type, unsigned int x, 
 {
   ofCamera cam;
 //  cam.setTransformMatrix(m_viewInverse);
-    cam.lo
-  ofVec3f mat_screenCoord = cam.worldToScreen(m_translationSaved,viewport);
+//    cam.setLocalTransform = 
+  auto mat_screenCoord = cam.worldToScreen(m_translationSaved,viewport);
   m_lockedCursor_x = mat_screenCoord.x - x;
   m_lockedCursor_y = mat_screenCoord.y - y;
   m_translationSaved = m_translation;
@@ -778,10 +787,10 @@ bool ofxManipulator::checkRotationPlane(ofVec3f normal, float factor, ofVec3f ra
 void ofxManipulator::drawCircle(ofVec3f origin, ofVec3f vtx, ofVec3f vty, ofColor color)
 {
   const int size = 50;
-  vector<ofVec3f> vertices;
+  vector<glm::vec3> vertices;
   vertices.resize(size);
   for (int i = 0; i < size; i++) {
-    ofVec3f vt;
+    glm::vec3 vt;
     vt  = vtx * cos((2 * PI / size) * i);
     vt += vty * sin((2 * PI / size) * i);
     vt += origin;
@@ -794,10 +803,10 @@ void ofxManipulator::drawCircle(ofVec3f origin, ofVec3f vtx, ofVec3f vty, ofColo
 
 void ofxManipulator::drawAxis(ofVec3f origin, ofVec3f m_axis, ofVec3f vtx, ofVec3f vty, float fct, float fct2, ofColor color)
 {
-  vector<ofVec3f> cone_mesh;
+  vector<glm::vec3> cone_mesh;
   cone_mesh.resize(93);
   for (int i = 0, j = 0; i <= 30; i++) {
-    ofVec3f pt;
+    glm::vec3 pt;
     pt  = vtx * cos(((2 * PI) / 30.0f) * i) * fct;
     pt += vty * sin(((2 * PI) / 30.0f) * i) * fct;
     pt += m_axis * fct2;
@@ -837,12 +846,12 @@ void ofxManipulator::drawScaleAxis(ofVec3f origin, ofVec3f m_axis, ofVec3f vtx, 
 
 void ofxManipulator::drawCamembert(ofVec3f origin, ofVec3f vtx, ofVec3f vty, float ng, ofColor color)
 {
-  vector<ofVec3f> vertices;
+  vector<glm::vec3> vertices;
   vertices.resize(52);
   int j = 0;
   vertices[j++] = origin;
   for (int i = 0; i <= 50; i++) {
-    ofVec3f vt;
+    glm::vec3 vt;
     vt  = vtx * cos((ng / 50) * i);
     vt += vty * sin((ng / 50) * i);
     vt += origin;
@@ -860,7 +869,7 @@ void ofxManipulator::drawQuad(ofVec3f origin, float size, bool is_selected, ofVe
   m_axis_u *= 0.8f;
   m_axis_v *= 0.8f;
 
-  vector<ofVec3f> pts;
+  vector<glm::vec3> pts;
   pts.resize(4);
   pts[0] = origin;
   pts[1] = origin + (m_axis_u * size);
@@ -879,7 +888,7 @@ void ofxManipulator::drawTriangle(ofVec3f origin, float size, bool is_selected, 
   m_axis_u *= 0.8f;
   m_axis_v *= 0.8f;
 
-  vector<ofVec3f> pts;
+  vector<glm::vec3> pts;
   pts.resize(3);
   pts[0] = origin;
   pts[1] = (m_axis_u * size) + origin;
