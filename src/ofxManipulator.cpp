@@ -38,8 +38,9 @@ ofxManipulator::~ofxManipulator()
 // PUBLIC FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-void ofxManipulator::draw(ofCamera cam)
+void ofxManipulator::draw(ofCamera cam, ofRectangle viewport)
 {
+	this->viewport = viewport;
   ofPushStyle();
 
   ofFill();
@@ -47,7 +48,7 @@ void ofxManipulator::draw(ofCamera cam)
   ofDisableDepthTest();
 
   m_view = cam.getModelViewMatrix();
-  m_proj = cam.getProjectionMatrix();
+  m_proj = cam.getProjectionMatrix(viewport);
   m_viewInverse = m_view.getInverse();
   m_screenFactor = computeScreenFactor();
 
@@ -466,7 +467,7 @@ void ofxManipulator::mouseDragged(ofMouseEventArgs &mouse)
         ofVec3f n = mat_pos - mat_plane_pos;
         n.normalize();
 
-        ofVec3f ray_end = cam.screenToWorld(ofVec3f(x + m_lockedCursor_x, y + m_lockedCursor_y, 1.0f));
+        ofVec3f ray_end = cam.screenToWorld(ofVec3f(x + m_lockedCursor_x, y + m_lockedCursor_y, 1.0f),viewport);
         ofVec3f ray_dir = cam_pos - ray_end;
         ray_dir.normalize();
 
@@ -609,8 +610,9 @@ void ofxManipulator::getCurrRotation(ROTATION_TYPE &type, unsigned int x, unsign
 void ofxManipulator::getCurrTranslation(TRANSLATION_TYPE &type, unsigned int x, unsigned int y)
 {
   ofCamera cam;
-  cam.setTransformMatrix(m_viewInverse);
-  ofVec3f mat_screenCoord = cam.worldToScreen(m_translationSaved);
+//  cam.setTransformMatrix(m_viewInverse);
+    cam.lo
+  ofVec3f mat_screenCoord = cam.worldToScreen(m_translationSaved,viewport);
   m_lockedCursor_x = mat_screenCoord.x - x;
   m_lockedCursor_y = mat_screenCoord.y - y;
   m_translationSaved = m_translation;
@@ -675,12 +677,13 @@ void ofxManipulator::createRay(float x, float y, ofVec3f &ray_origin, ofVec3f &r
   ofMatrix4x4 view_inverse = m_viewInverse;
   ofMatrix4x4 proj = m_proj;
 
-  float w = ofGetWidth();
-  float h = ofGetHeight();
+	float w = viewport.width;//ofGetWidth();
+	float h = viewport.height;//ofGetHeight();
+
 
   ofVec3f screen_space(
-     (((2.0f * x) / w) - 1.0f) / proj._mat[0][0],
-    -(((2.0f * y) / h) - 1.0f) / proj._mat[1][1],
+     (((2.0f * (x-viewport.x)) / w) - 1.0f) / proj._mat[0][0],
+    -(((2.0f * (y-viewport.y)) / h) - 1.0f) / proj._mat[1][1],
     -1.0f
   );
 

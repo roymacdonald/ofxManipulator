@@ -16,7 +16,7 @@ class ofxManipulator
       MANIPULATOR_TRANSLATION
     };
 
-    void draw(ofCamera cam);
+    void draw(ofCamera cam, ofRectangle viewport);
 
     ofMatrix4x4 getMatrix();
 
@@ -47,7 +47,7 @@ class ofxManipulator
     void mousePressed(ofMouseEventArgs&);
     void mouseDragged(ofMouseEventArgs&);
     void mouseReleased(ofMouseEventArgs&);
-
+	ofRectangle viewport;
   private:
     enum SCALE_TYPE
     {
